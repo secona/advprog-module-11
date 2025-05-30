@@ -7,3 +7,36 @@ Yes, the number of log entries increases each time I interact with the app. Befo
 > Notice that there are two versions of kubectl get invocation during this tutorial section. The first does not have any option, while the latter has -n option with value set to kube-system. What is the purpose of the -n option and why did the output not list the pods/services that you explicitly created? Hint: Do some reading about Namespace in Kubernetes documentation.
 
 The `-n` option in the kubectl get command specifies the namespace to look in when querying Kubernetes resources. When the command is used without `-n`, it defaults to the `default` namespace, where user-created Pods and Services are typically deployed unless otherwise specified. In contrast, using `-n kube-system` filters the output to show only the resources running in the `kube-system` namespace, which is reserved for internal Kubernetes components such as CoreDNS and the `kube-proxy`. This is why you don’t see your own Pods or Services listed when using `-n kube-system`, they exist in a different namespace.
+
+> What is the difference between Rolling Update and Recreate deployment strategy?
+
+The Rolling Update deployment strategy updates pods incrementally by gradually replacing old pods with new ones, ensuring that some instances of the application remain available throughout the process, which minimizes downtime and supports version overlap. In contrast, the Recreate strategy terminates all existing pods before creating new ones, causing downtime but ensuring that only one version of the application runs at any time. Rolling Update is ideal for applications that tolerate mixed versions during the update, while Recreate suits scenarios where a clean, version-exclusive rollout is required.
+
+> Try deploying the Spring Petclinic REST using Recreate deployment strategy and document your attempt.
+
+To use the Recreate deployment strategy, I copied `deployment.yaml` to a new file called `deployment_recreate.yaml`. Then, in `deployment_recreate.yaml`, I removed the `.spec.strategy.rollingUpdate` config and set `.spec.strategy.type` to `Recreate`.
+
+#### Starting `minikube`
+
+![image](https://github.com/user-attachments/assets/b76fd2b2-8875-4bdc-8f9c-f333fbb19499)
+
+#### Applying `deployment_recreate.yaml`
+
+![image](https://github.com/user-attachments/assets/68c85a51-9715-46c6-a36c-8f8d29310575)
+
+#### Applying `service.yaml`
+
+![image](https://github.com/user-attachments/assets/546d4913-1503-4c84-8290-b62927e1072c)
+
+#### Wait until pods are running
+
+![image](https://github.com/user-attachments/assets/d3157406-98be-4dbc-8b43-f0f4916cbf87)
+
+#### Accessing Petclinic
+
+![image](https://github.com/user-attachments/assets/ac8f4eed-b7d2-4ddf-94bc-ce5c1ce90861)
+![image](https://github.com/user-attachments/assets/c208c2bf-1f73-4059-9ddb-2ecfcda3d62d)
+
+> What do you think are the benefits of using Kubernetes manifest files? Recall your experience in deploying the app manually and compare it to your experience when deploying the same app by applying the manifest files (i.e., invoking `kubectl apply -f` command) to the cluster.
+
+Reproducibility. Based on my experience, deploying an app manually involved a lot of repetitive steps, such as creating deployments, services, and configurations each time. In contrast, using manifest files with `kubectl apply -f` allowed me to define everything declaratively in a reusable format. This not only made the deployment process faster and more consistent but also reduced the chance of human error, especially when working across different environments or teams.
